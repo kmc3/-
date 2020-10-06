@@ -8,76 +8,75 @@
 	<h1>掲示板</h1>
     
     <?php
-		//エラー表示 ini_set('display_errors', 'Off'); 
 
-		//変数の定義
+	//変数の定義
         $deleteNo = ''; // 削除する投稿番号
         $editNo = ''; // 編集する投稿番号
         $prePassword = ''; // 編集前のパスワード
         $preName = ''; // 編集前の名前
         $preComment = ''; // 編集前のコメント
 
-		// データベース名、ユーザー名、パスワード
-		$dsn = 'データベース名';
-		$user = 'ユーザー名';
-		$password = 'パスワード';
+	// データベース名、ユーザー名、パスワード
+	$dsn = 'データベース名';
+	$user = 'ユーザー名';
+	$password = 'パスワード';
 
-		//MySQLに接続
-		try{
-			//PDOという方法で接続する
-			$pdo = new PDO($dsn, $user, $password, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
-			//keijibanという名前のテーブルを作成
-			$sql = "CREATE TABLE IF NOT EXISTS keijiban"
-			//カラムの作成
-			." ("
-			. "id INT AUTO_INCREMENT PRIMARY KEY,"	//投稿番号
-			. "name char(32),"		//名前
-			. "comment TEXT,"		//コメント
-			. "datetime DATETIME,"	//日付
-			. "password char(32)"	//パスワード
-			.");";
-			$stmt = $pdo->query($sql);
+	//MySQLに接続
+	try{
+		//PDOという方法で接続する
+		$pdo = new PDO($dsn, $user, $password, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
+		//keijibanという名前のテーブルを作成
+		$sql = "CREATE TABLE IF NOT EXISTS keijiban"
+		//カラムの作成
+		." ("
+		. "id INT AUTO_INCREMENT PRIMARY KEY,"	//投稿番号
+		. "name char(32),"		//名前
+		. "comment TEXT,"		//コメント
+		. "datetime DATETIME,"	//日付
+		. "password char(32)"	//パスワード
+		.");";
+		$stmt = $pdo->query($sql);
 
-			//投稿機能
-			//名前、コメント、パスワードが入力されていて編集が入力されていない場合新規投稿として処理
-			if (!empty($_POST['comment']) && !empty($_POST['name'])){
-				if (empty ($_POST['editPostNo'])&& !empty($_POST['pass'])){
-					// prepareメソッドでデータの入力をする
-					//テーブルのカラムに対してパラメータを与える
-					$sql = $pdo -> prepare("INSERT INTO keijiban (name, comment, datetime, password) VALUES (:name, :comment, :datetime, :password)");
-					// これらのパラメータを文字列として指定
-					$sql -> bindParam(':name', $name, PDO::PARAM_STR);
-					$sql -> bindParam(':comment', $comment, PDO::PARAM_STR);
-					$sql -> bindParam(':datetime', $datetime, PDO::PARAM_STR);
-					$sql -> bindParam(':password', $password, PDO::PARAM_STR);
-					//その他の定義
-					$name = $_POST['name'];	//投稿者の名前
-					$comment = $_POST['comment'];	//投稿されたコメント
-					$datetime = date("Y/m/d H:i:s");	//日付
-					$password = $_POST['pass'];	//パスワード
-					//これらを実行する
-					$sql -> execute();
+		//投稿機能
+		//名前、コメント、パスワードが入力されていて編集が入力されていない場合新規投稿として処理
+		if (!empty($_POST['comment']) && !empty($_POST['name'])){
+			if (empty ($_POST['editPostNo'])&& !empty($_POST['pass'])){
+				// prepareメソッドでデータの入力をする
+				//テーブルのカラムに対してパラメータを与える
+				$sql = $pdo -> prepare("INSERT INTO keijiban (name, comment, datetime, password) VALUES (:name, :comment, :datetime, :password)");
+				// これらのパラメータを文字列として指定
+				$sql -> bindParam(':name', $name, PDO::PARAM_STR);
+				$sql -> bindParam(':comment', $comment, PDO::PARAM_STR);
+				$sql -> bindParam(':datetime', $datetime, PDO::PARAM_STR);
+				$sql -> bindParam(':password', $password, PDO::PARAM_STR);
+				//その他の定義
+				$name = $_POST['name'];	//投稿者の名前
+				$comment = $_POST['comment'];	//投稿されたコメント
+				$datetime = date("Y/m/d H:i:s");	//日付
+				$password = $_POST['pass'];	//パスワード
+				//これらを実行する
+				$sql -> execute();
 					   
-				//editPostNoとパスワードが入力されている場合、編集として処理
-				}elseif (!empty($_POST['editPostNo']) && !empty($_POST['pass'])){
-					$name = $_POST['name'];	
-					$comment = $_POST['comment'];	
-					$datetime = date("Y/m/d H:i:s");	
-					$password = $_POST['pass'];	
-					$id = $_POST['editPostNo'];	//隠れてる編集番号
-					//SQL文　テーブルから編集対象番号が一致するものをアップデートする
-					$sql = "UPDATE keijiban SET name=:name,comment=:comment,datetime=:datetime,password=:password WHERE id=:id";
-					//prepareでSQL文をセットする
-					$stmt = $pdo->prepare($sql);
-					//bindParamで値をセットする
-					$stmt -> bindParam(':name', $name, PDO::PARAM_STR);
-					$stmt -> bindParam(':comment', $comment, PDO::PARAM_STR);
-					$stmt -> bindParam(':datetime', $datetime, PDO::PARAM_STR);
-					$stmt -> bindParam(':password', $password, PDO::PARAM_STR);
-					$stmt -> bindParam(':id', $id, PDO::PARAM_INT);
-					//実行
-					$stmt -> execute();		
-				}
+			//editPostNoとパスワードが入力されている場合、編集として処理
+			}elseif (!empty($_POST['editPostNo']) && !empty($_POST['pass'])){
+				$name = $_POST['name'];	
+				$comment = $_POST['comment'];	
+				$datetime = date("Y/m/d H:i:s");	
+				$password = $_POST['pass'];	
+				$id = $_POST['editPostNo'];	//隠れてる編集番号
+				//SQL文　テーブルから編集対象番号が一致するものをアップデートする
+				$sql = "UPDATE keijiban SET name=:name,comment=:comment,datetime=:datetime,password=:password WHERE id=:id";
+				//prepareでSQL文をセットする
+				$stmt = $pdo->prepare($sql);
+				//bindParamで値をセットする
+				$stmt -> bindParam(':name', $name, PDO::PARAM_STR);
+				$stmt -> bindParam(':comment', $comment, PDO::PARAM_STR);
+				$stmt -> bindParam(':datetime', $datetime, PDO::PARAM_STR);
+				$stmt -> bindParam(':password', $password, PDO::PARAM_STR);
+				$stmt -> bindParam(':id', $id, PDO::PARAM_INT);
+				//実行
+				$stmt -> execute();		
+			}
 
 			//削除機能
 			//削除対象番号が入力されている場合
